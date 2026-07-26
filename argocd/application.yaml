@@ -7,7 +7,7 @@ spec:
   project: default
 
   source:
-    repoURL: https://github.com/saurabhpaljhs-maker/ATM-Project.git
+    repoURL: https://github.com/saurabhpaljhs-maker/atm-gke-devops.git
     targetRevision: main
     path: helm/atm-project
     helm:

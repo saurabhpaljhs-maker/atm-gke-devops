@@ -2,16 +2,11 @@ resource "google_container_cluster" "atm_cluster" {
   name     = var.cluster_name
   location = var.region
 
-  # Autopilot mode - Google khud nodes manage karega, humein sirf app deploy karni hai
-  # Fast setup + minimal ops overhead, banking POC/demo ke liye perfect fit
-  enable_autopilot = true
+  remove_default_node_pool = true
+  initial_node_count       = 1
 
-  # IMPORTANT: default true hota hai, isse false rakho warna terraform destroy fail hoga
-  # aur cluster manually delete karna padega console se
   deletion_protection = false
 
-  # default VPC use kar rahe hain speed ke liye - production mein custom VPC banate
-  # (jaisa AWS wale version mein tha), lekin demo/interview scope ke liye yeh sufficient hai
   network    = "default"
   subnetwork = "default"
 
@@ -20,11 +15,33 @@ resource "google_container_cluster" "atm_cluster" {
   }
 }
 
-output "cluster_name" {
-  value = google_container_cluster.atm_cluster.name
-}
+resource "google_container_node_pool" "primary_nodes" {
+  name       = "${var.cluster_name}-primary-pool"
+  location   = var.region
+  cluster    = google_container_cluster.atm_cluster.name
+  node_count = 1
 
-output "cluster_endpoint" {
-  value     = google_container_cluster.atm_cluster.endpoint
-  sensitive = true
+  node_config {
+    machine_type = "e2-medium"
+    disk_size_gb = 30
+    disk_type    = "pd-standard"
+
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/cloud-platform"
+    ]
+
+    labels = {
+      app = "atm-project"
+    }
+  }
+
+  autoscaling {
+    min_node_count = 1
+    max_node_count = 2
+  }
+
+  management {
+    auto_repair  = true
+    auto_upgrade = true
+  }
 }

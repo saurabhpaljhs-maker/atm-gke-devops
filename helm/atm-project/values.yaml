@@ -2,8 +2,8 @@ replicaCount: 2
 
 image:
   # Terraform output se milega registry URL, CI pipeline yahan tag update karega
-  repository: asia-south1-docker.pkg.dev/PROJECT_ID/atm-project-repo/atm-project-app
-  tag: latest
+  repository: asia-south1-docker.pkg.dev/project-c516c2da-ce01-4d29-b05/atm-project-repo/atm-project-app
+  tag: v1
   pullPolicy: Always
 
 service:

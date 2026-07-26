@@ -69,4 +69,11 @@ app.post('/api/atm/withdraw', (req, res) => {
 
     res.status(200).json({
         status: "Success",
-        msg:
+        msg: `Withdrawal successful. New balance: ₹${accounts[accountId].balance}`
+    });
+});
+
+// Server start
+app.listen(PORT, () => {
+    console.log(`ATM-Project server running on port ${PORT}`);
+});
