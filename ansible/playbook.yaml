@@ -1,0 +1,70 @@
+---
+- name: Configure DevSecOps Environment for ATM-Project
+  hosts: localhost
+  connection: local
+  become: yes
+
+  tasks:
+    - name: 1. Update Apt Cache Safely
+      apt:
+        update_cache: yes
+        force_apt_get: yes
+      register: apt_result
+      until: apt_result is success
+      retries: 3
+      delay: 5
+
+    - name: 2. Install Standard Dependencies & Network Tools
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+          - gnupg
+          - unzip
+        state: present
+
+    - name: 3. Add Docker GPG Apt Key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: 4. Add Docker Official Repository Channel
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+
+    - name: 5. Install Docker Engine Components
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+        state: present
+        update_cache: yes
+
+    - name: 6. Ensure Docker Service is Active and Enabled
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: 7. Security Hardening - Add System Users to Docker Group
+      user:
+        name: "{{ item }}"
+        groups: docker
+        append: yes
+      loop:
+        - "azureuser"
+        - "jenkins" # Pipeline commands error out na karein isliye safety setup
+      ignore_errors: yes
+
+    - name: 8. Verify gcloud CLI Installation Status
+      command: gcloud --version
+      register: gcloud_cli_check
+      ignore_errors: yes
+
+    - name: 9. Message Log Alert Checkpoint
+      debug:
+        msg: "Bhai, Base Machine Toolchain Architecture Configured Successfully!"

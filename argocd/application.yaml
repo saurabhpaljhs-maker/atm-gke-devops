@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: atm-project
+  namespace: argocd
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/saurabhpaljhs-maker/ATM-Project.git
+    targetRevision: main
+    path: helm/atm-project
+    helm:
+      valueFiles:
+        - values.yaml
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+
+  syncPolicy:
+    automated:
+      prune: true      # Git se resource hataya toh cluster se bhi delete hoga
+      selfHeal: true   # manual kubectl change ko wapas Git state pe revert karega
+    syncOptions:
+      - CreateNamespace=true

@@ -1,0 +1,25 @@
+replicaCount: 2
+
+image:
+  # Terraform output se milega registry URL, CI pipeline yahan tag update karega
+  repository: asia-south1-docker.pkg.dev/PROJECT_ID/atm-project-repo/atm-project-app
+  tag: latest
+  pullPolicy: Always
+
+service:
+  type: LoadBalancer
+  port: 80
+  targetPort: 8081
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+# Rolling update - zero downtime deployment
+strategy:
+  maxSurge: 1
+  maxUnavailable: 0
